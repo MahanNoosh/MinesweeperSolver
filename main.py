@@ -1,5 +1,5 @@
 from read.capture import capture_board, get_board_region
-from read.find_default_tiles import get_default_tile
+from read.get_default_tiles import get_default_tile
 from read.detect_grid_intersections_on_board import detect_grid_intersections_on_board
 
 board_region = get_board_region()
