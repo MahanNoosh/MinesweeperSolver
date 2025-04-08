@@ -2,7 +2,13 @@ import pyautogui
 import time
 
 def get_board_region():
-    # Get region of the board
+    """
+    Prompts the user to move their mouse to the top-left and bottom-right corners of the board
+    to determine the region for capturing the board.
+
+    Returns:
+        tuple: A region defined as (x, y, width, height).
+    """
     print("Move your mouse to the **TOP-LEFT** corner of the board...")
     time.sleep(3)
     top_left = pyautogui.position()
@@ -13,9 +19,22 @@ def get_board_region():
     bottom_right = pyautogui.position()
     print(f"Bottom-right: {bottom_right}")
 
-    return (top_left.x, top_left.y, bottom_right.x - top_left.x, bottom_right.y - top_left.y)
+    # Compute region as (x, y, width, height)
+    region = (
+        top_left.x,
+        top_left.y,
+        bottom_right.x - top_left.x,
+        bottom_right.y - top_left.y
+    )
+    return region
 
-# Take screenshot of that region
 def capture_board(output_file, region):
+    """
+    Captures a screenshot of the specified region and saves it to a file.
+
+    Args:
+        output_file (str): Name of the output image file (e.g., "state.png").
+        region (tuple): Region to capture in the format (x, y, width, height).
+    """
     screenshot = pyautogui.screenshot(region=region)
     screenshot.save("template/" + output_file)
