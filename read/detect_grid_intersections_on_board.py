@@ -34,11 +34,20 @@ def detect_grid_intersections_on_board(board_image, intersection1_image, interse
 
     # Perform template matching for both samples
     matches = []
-    for sample_gray in [sample1_gray, sample2_gray]:
-        result = cv2.matchTemplate(board_gray, sample_gray, cv2.TM_CCOEFF_NORMED)
-        locs = np.where(result >= threshold)
-        sample_matches = list(zip(*locs[::-1]))
-        matches.extend(sample_matches)
+    result1 = cv2.matchTemplate(board_gray, sample1_gray, cv2.TM_CCOEFF_NORMED)
+    result2 = cv2.matchTemplate(board_gray, sample2_gray, cv2.TM_CCOEFF_NORMED)
+    locs1 = np.where(result1 >= threshold)
+    locs2 = np.where(result2 >= threshold)
+    sample_matches1 = list(zip(*locs1[::-1]))
+    sample_matches2 = list(zip(*locs2[::-1]))
+
+    # Alternate between the two sets of matches
+    max_len = max(len(sample_matches1), len(sample_matches2))
+    for i in range(max_len):
+        if i < len(sample_matches1):
+            matches.append(sample_matches1[i])
+        if i < len(sample_matches2):
+            matches.append(sample_matches2[i])
 
     # Deduplicate nearby points (within dist_thresh)
     def deduplicate(points, dist_thresh=5):
@@ -53,14 +62,14 @@ def detect_grid_intersections_on_board(board_image, intersection1_image, interse
     # Draw circles at detected points (for debugging / visualization)
     grid_image = board_img.copy()
     grid_w, grid_h = grid_sample1.shape[1], grid_sample1.shape[0]
-    for (x, y) in matches:
-        center_x = x + grid_w // 2
-        center_y = y + grid_h // 2
-        cv2.circle(grid_image, (center_x, center_y), 3, (0, 255, 0), -1)
-
+    for i in range(len(matches)):
+        x, y = matches[i]
+        matches[i] = (x + grid_w // 2, y + grid_h // 2)
+        cv2.circle(grid_image, matches[i], 3, (0, 255, 0), -1)
+        
     # Uncomment below lines to preview detected matches
-    # cv2.imshow('Detected Grid Intersections', grid_image)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+    cv2.imshow('Detected Grid Intersections', grid_image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     return matches

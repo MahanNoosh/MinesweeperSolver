@@ -90,9 +90,6 @@ def get_intersection(image, region1, region2, output_file1, output_file2):
     
     height = region3[3] - region3[1]
     
-    print(f"Height: {height}")
-    print(f"Gap: {gap}")
-    
     region4 = (
         region3[0],
         region3[1] + height + gap,
@@ -107,13 +104,13 @@ def get_intersection(image, region1, region2, output_file1, output_file2):
     grid_sample2.save("template/" + output_file2)
 
     # Debug: visualize the regions on the original image
-    debug_img = image.copy()
-    draw = ImageDraw.Draw(debug_img)
-    draw.rectangle(region3, outline="red")
-    draw.rectangle(region4, outline="blue")
-    debug_img.show()
+    # debug_img = image.copy()
+    # draw = ImageDraw.Draw(debug_img)
+    # draw.rectangle(region3, outline="red")
+    # draw.rectangle(region4, outline="blue")
+    # debug_img.show()
 
-def get_default_tile(board_image, output_file1, output_file2):
+def get_starter_template(board_image, output_file1, output_file2):
     """
     Detect and save two default tiles and their intersection areas.
     
