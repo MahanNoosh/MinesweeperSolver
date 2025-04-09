@@ -68,8 +68,8 @@ def detect_grid_intersections_on_board(board_image, intersection1_image, interse
         cv2.circle(grid_image, matches[i], 3, (0, 255, 0), -1)
         
     # Uncomment below lines to preview detected matches
-    cv2.imshow('Detected Grid Intersections', grid_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow('Detected Grid Intersections', grid_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     return matches

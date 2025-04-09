@@ -38,3 +38,16 @@ def capture_board(output_file, region):
     """
     screenshot = pyautogui.screenshot(region=region)
     screenshot.save("template/" + output_file)
+
+def capture_tile(image, region):
+    """
+    Capture a tile from the image based on the given region.
+    
+    Args:
+        image (PIL.Image): The image from which to capture the tile.
+        region (tuple): The bounding box of the region (left, top, right, bottom).
+    
+    Returns:
+        PIL.Image: The cropped tile image.
+    """
+    return image.crop(region)

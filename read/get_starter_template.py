@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw
+from read.capture import capture_tile
 import random
 
 def _get_center(width, height):
@@ -62,19 +63,6 @@ def _detect_tile_boundaries(image, start_x, start_y):
 
     return (left, top, right, bottom)
 
-def _capture_tile(image, region):
-    """
-    Capture a tile from the image based on the given region.
-    
-    Args:
-        image (PIL.Image): The image from which to capture the tile.
-        region (tuple): The bounding box of the region (left, top, right, bottom).
-    
-    Returns:
-        PIL.Image: The cropped tile image.
-    """
-    return image.crop(region)
-
 def get_intersection(image, region1, region2, output_file1, output_file2):
     """
     Capture cross-like adjacent intersection tiles between region1 and region2.
@@ -97,8 +85,8 @@ def get_intersection(image, region1, region2, output_file1, output_file2):
         region3[3] + height + gap
     )
     
-    grid_sample1 = _capture_tile(image, region3)
-    grid_sample2 = _capture_tile(image, region4)
+    grid_sample1 = capture_tile(image, region3)
+    grid_sample2 = capture_tile(image, region4)
     
     grid_sample1.save("template/" + output_file1)
     grid_sample2.save("template/" + output_file2)
@@ -127,8 +115,8 @@ def get_starter_template(board_image, output_file1, output_file2):
     region1 = _detect_tile_boundaries(image, start_x, start_y)
     region2 = _detect_tile_boundaries(image, region1[2] + 10, region1[1])
 
-    default_tile1 = _capture_tile(image, region1)
-    default_tile2 = _capture_tile(image, region2)
+    default_tile1 = capture_tile(image, region1)
+    default_tile2 = capture_tile(image, region2)
 
     if default_tile1:
         default_tile1.save("template/" + output_file1)
