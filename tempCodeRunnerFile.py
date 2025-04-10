@@ -1,1 +1,0 @@
-get_tile_number
