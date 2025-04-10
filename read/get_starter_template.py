@@ -113,7 +113,9 @@ def get_starter_template(board_image, output_file1, output_file2):
     start_x, start_y = _get_center(width, height)
 
     region1 = _detect_tile_boundaries(image, start_x, start_y)
-    region2 = _detect_tile_boundaries(image, region1[2] + 10, region1[1])
+    x_offset = 2 * (region1[2] - region1[0]) // 3
+    y_offset = 2 * (region1[3] - region1[1]) // 3
+    region2 = _detect_tile_boundaries(image, region1[2] + x_offset, region1[1] + y_offset)
 
     default_tile1 = capture_tile(image, region1)
     default_tile2 = capture_tile(image, region2)
