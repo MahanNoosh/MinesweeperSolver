@@ -39,7 +39,7 @@ def click_at(x, y):
 
 
 def random_click(grid):
-    x = random.randint(0, len(grid[0]) - 1)
-    y = random.randint(0, len(grid) - 1)
-    click_at(grid[y][x][0], grid[y][x][1])
-    return x, y
+    col = random.randint(0, len(grid[0]) - 1)
+    row = random.randint(0, len(grid) - 1)
+    click_at(grid[row][col][0], grid[row][col][1])
+    return row, col
