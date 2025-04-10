@@ -1,5 +1,4 @@
 import pyautogui
-import time
 import random
 
 board_start = (0, 0)
