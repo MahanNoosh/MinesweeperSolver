@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS specific
+.DS_Store
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Tesseract-generated files (optional)
+*.box
+*.traineddata
+
+# Images and temporary files
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.tiff
+state.png
+tile.png
+
+# Logs and outputs
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# System files
+Thumbs.db
+ehthumbs.db
+
+# Other project-specific
+test_outputs/
