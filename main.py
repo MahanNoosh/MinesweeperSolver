@@ -7,9 +7,12 @@ from read.get_tile_number import get_tile_number
 from read.get_tile_region import get_tile_region, initialize_tile_dimensions
 from process.update_around_empty_tile import update_around_empty_tile
 from PIL import Image
-
+import os
 import time
 
+
+if not os.path.exists('template'):
+    os.mkdir('template')
 
 board_region = get_board_region()
 
