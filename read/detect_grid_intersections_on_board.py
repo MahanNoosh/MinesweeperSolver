@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def detect_grid_intersections_on_board(board_image, intersection1_image, intersection2_image, threshold=0.98):
+def detect_grid_intersections_on_board(board_image, intersection1_image, intersection2_image, threshold=0.99):
     """
     Detects grid intersection points on a board image using template matching with two sample intersection images.
 

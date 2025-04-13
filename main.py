@@ -23,7 +23,7 @@ row, col = find_list_dimension(intersections)
 grid_coordinates = convert_to_2d_tiles_list(intersections)
 tile_width = grid_coordinates[0][1][0] - grid_coordinates[0][0][0]
 tile_height = grid_coordinates[1][0][1] - grid_coordinates[0][0][1]
-
+print(row, col)
 initialize_tile_dimensions(tile_width, tile_height)
 
 grid = [[None for _ in range(col)] for _ in range(row)]

@@ -1,6 +1,6 @@
 import cv2
 
-def find_list_dimension(intersections, tolerance=5):
+def find_list_dimension(intersections, tolerance=3):
     """
     Estimate grid dimensions based on consistent Y values in the first row.
     """
