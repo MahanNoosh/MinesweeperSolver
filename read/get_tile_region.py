@@ -29,5 +29,5 @@ def get_tile_region(row, col, grid_coordinates):
     top = grid_coordinates[row][col][1]
     right = left + tile_width
     bottom = top + tile_height
-    return left, top, right, bottom
+    return left, top, right + 2, bottom + 2
     

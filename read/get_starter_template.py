@@ -3,21 +3,6 @@ from read.capture import capture_tile
 from collections import deque
 import random
 
-def _get_center(width, height):
-    """
-    Calculate the center of the image.
-    
-    Args:
-        width (int): The width of the image.
-        height (int): The height of the image.
-    
-    Returns:
-        tuple: Coordinates (x, y) of the center.
-    """
-    x_center = 2 * width // 3
-    y_center = 2 * height // 3
-    return x_center, y_center
-
 def color_similar(c1, c2, threshold=15):
     return sum(abs(a - b) for a, b in zip(c1, c2)) < threshold
 
@@ -34,7 +19,7 @@ def _detect_tile_boundaries_helper(image, start_x, start_y):
     Returns:
         tuple: The bounding box of the detected tile (left, top, right, bottom).
     """
-    if not (image.width // 3 <= start_x <= 2 * image.width // 3 and image.height // 3 <= start_y <= 2 * image.height // 3):
+    if not (image.width // 4 <= start_x <= 3 * image.width // 4 and image.height // 4 <= start_y <= 3 * image.height // 4):
         return None
     
     original_color = image.getpixel((start_x, start_y))
@@ -92,8 +77,8 @@ def _detect_tile_boundaries(image, start_x = None, start_y = None):
         if tile:
             return tile
     else:
-        for x in range(image.width // 3, 2 * image.width // 3):
-            for y in range(image.height // 3, 2 * image.height // 3):
+        for x in range(image.width // 4, 3 * image.width // 4):
+            for y in range(image.height // 4, 3 * image.height // 4):
                 tile = _detect_tile_boundaries_helper(image, x, y)
                 if tile:
                     return tile
@@ -148,7 +133,7 @@ def get_starter_template(board_image, output_file1, output_file2):
     image = Image.open("template/" + board_image)
 
     region1 = _detect_tile_boundaries(image)
-    x_offset = 2 * (region1[2] - region1[0]) // 3
+    x_offset = 3 * (region1[2] - region1[0]) // 4
     region2 = _detect_tile_boundaries(image, region1[2] + x_offset, (region1[1] + region1[3]) // 2)
 
     default_tile1 = capture_tile(image, region1)

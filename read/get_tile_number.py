@@ -23,5 +23,3 @@ def get_tile_number(pil_image):
     numbers = ''.join(filter(str.isdigit, detected_text))
 
     return numbers
-
-
