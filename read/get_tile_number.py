@@ -15,11 +15,15 @@ def get_tile_number(pil_image):
 
     # Apply thresholding
     _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
-
+    
     # OCR to detect number
     detected_text = pytesseract.image_to_string(thresh, config='--psm 6 --oem 3 outputbase digits')
 
     # Filter digits
     numbers = ''.join(filter(str.isdigit, detected_text))
+    
+    # cv2.imshow('thresh', thresh)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     return numbers

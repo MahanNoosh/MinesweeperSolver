@@ -40,6 +40,5 @@ ehthumbs.db
 test_outputs/
 
 #test and try and error files
-solver/
 config.py
 enhanced_number_detection.py

@@ -43,6 +43,9 @@ grid[r_row][r_col] = number if number else 0
 if grid[r_row][r_col] == 0:
     update_around_empty_tile(r_row, r_col, grid, grid_coordinates)
 print(grid)
+if all([all([cell == 0 for cell in row]) for row in grid]):
+    print("The board is unreadable. Please zoom in and try again.")
+    exit(0)
 
 
 # for _ in range(100):  # Limit the loop to 100 iterations for controlled execution
