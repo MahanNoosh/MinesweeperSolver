@@ -42,3 +42,18 @@ def random_click(grid):
     row = random.randint(0, len(grid) - 1)
     click_at(grid[row][col][0], grid[row][col][1])
     return row, col
+
+def click_all(coordinates):
+    for row, col in coordinates:
+        click_at(row, col)
+
+
+def flag_at(x, y):
+    x = x + board_start[0] + tile_width // 2
+    y = y + board_start[1] + tile_height // 2
+    pyautogui.moveTo(x, y)
+    pyautogui.click(button='right')
+
+def flag_all(coordinates):
+    for row, col in coordinates:
+        flag_at(row, col)

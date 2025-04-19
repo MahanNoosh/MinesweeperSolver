@@ -28,7 +28,7 @@ def convert_to_2d_tiles_list(intersections):
 
     for i in range(row - 1):
         row_start_index = i * (col - 1)
-        core_row = intersections[row_start_index : row_start_index + col]
+        core_row = intersections[row_start_index : row_start_index + col - 1]
         extended_row = [(core_row[0][0] - width, core_row[0][1])] + core_row
         all_tiles_coordinates.append(extended_row)
 
@@ -38,7 +38,6 @@ def convert_to_2d_tiles_list(intersections):
 
     # Optionally draw for debug
     # _draw_grid_points("template/state.png", all_tiles_coordinates)
-
     return all_tiles_coordinates  # 2D list [row][col] of (x, y)
 
 
@@ -55,6 +54,10 @@ def _draw_grid_points(image_path, grid_points, output_path="debug_grid.png"):
         for (x, y) in row:
             cv2.circle(img, (int(x), int(y)), radius=3, color=(0, 0, 255), thickness=-1)
 
+    for (x, y) in grid_points[0]:
+            cv2.circle(img, (int(x), int(y)), radius=3, color=(0, 255, 0), thickness=-1)
+
+    
     cv2.imshow("Grid Visualization", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

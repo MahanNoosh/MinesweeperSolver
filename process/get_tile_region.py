@@ -30,4 +30,16 @@ def get_tile_region(row, col, grid_coordinates):
     right = left + tile_width
     bottom = top + tile_height
     return left, top, right, bottom
+
+def get_all_tile_regions(grid_coordinates):
+    """
+    Get the regions of all tiles in the grid.
+    
+    Args:
+        grid_coordinates (list): The coordinates of each tile in the grid.
+    
+    Returns:
+        list: A list of regions for each tile in the grid.
+    """
+    return [[get_tile_region(row, col, grid_coordinates) for row in range(len(grid_coordinates))] for col in range(len(grid_coordinates[0]))]
     

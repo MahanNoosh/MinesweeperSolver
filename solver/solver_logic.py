@@ -165,4 +165,5 @@ class SolverLogic:
                         best_guess = (row, col)
         
         self.safe_cells.add(best_guess)
-        return best_guess 
+        return {best_guess}
+     

@@ -1,5 +1,5 @@
 from read.get_tile_number import get_tile_number
-from read.get_tile_region import get_tile_region
+from process.get_tile_region import get_tile_region
 from read.capture import capture_tile
 from PIL import Image
 from collections import deque
@@ -22,7 +22,7 @@ def update_around_empty_tile(i_row, i_col, grid, grid_coordinates):
             image = Image.open("template/state.png")
             tile = capture_tile(image, get_tile_region(row, col, grid_coordinates))
             number = get_tile_number(tile)
-            grid[row][col] = number if number else 0
+            grid[row][col].value = int(number) if number else 0
             return not number  # Return True if the tile is empty (number is 0)
         return False
 
