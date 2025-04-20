@@ -1,5 +1,6 @@
 import pyautogui
 import random
+import time
 
 board_start = (0, 0)
 tile_width = 0
@@ -36,7 +37,6 @@ def click_at(x, y):
     pyautogui.click()
     print(f"Clicked at ({x}, {y})")
 
-
 def random_click(grid):
     col = random.randint(0, len(grid[0]) - 1)
     row = random.randint(0, len(grid) - 1)
@@ -47,12 +47,24 @@ def click_all(coordinates):
     for row, col in coordinates:
         click_at(row, col)
 
-
 def flag_at(x, y):
+    """
+    Moves the mouse to (x, y) and performs a right-click to flag a mine.
+    
+    Args:
+        x (int): The x-coordinate to flag.
+        y (int): The y-coordinate to flag.
+    """
     x = x + board_start[0] + tile_width // 2
     y = y + board_start[1] + tile_height // 2
+    # Move the mouse to the given position
     pyautogui.moveTo(x, y)
-    pyautogui.click(button='right')
+    time.sleep(0.1)  # Small delay to ensure mouse is in position
+    # Perform right-click
+    pyautogui.mouseDown(button='right')
+    time.sleep(0.05)  # Hold the button briefly
+    pyautogui.mouseUp(button='right')
+    print(f"Flagged at ({x}, {y})")
 
 def flag_all(coordinates):
     for row, col in coordinates:

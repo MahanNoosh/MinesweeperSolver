@@ -19,7 +19,9 @@ def _detect_tile_boundaries_helper(image, start_x, start_y):
     Returns:
         tuple: The bounding box of the detected tile (left, top, right, bottom).
     """
-    if not (image.width // 4 <= start_x <= 3 * image.width // 4 and image.height // 4 <= start_y <= 3 * image.height // 4):
+    # Add padding to avoid edge detection issues
+    padding = 5
+    if not (padding <= start_x <= image.width - padding and padding <= start_y <= image.height - padding):
         return None
     
     original_color = image.getpixel((start_x, start_y))
@@ -27,28 +29,28 @@ def _detect_tile_boundaries_helper(image, start_x, start_y):
     top, bottom = start_y, start_y
     left, right = start_x, start_x
 
-    while top > 0 and color_similar(image.getpixel((start_x, top - 1)), original_color):
+    # Find boundaries with more conservative color matching
+    while top > padding and color_similar(image.getpixel((start_x, top - 1)), original_color, threshold=10):
         top -= 1
-    while bottom < image.height - 1 and color_similar(image.getpixel((start_x, bottom + 1)), original_color):
+    while bottom < image.height - padding and color_similar(image.getpixel((start_x, bottom + 1)), original_color, threshold=10):
         bottom += 1
-    while right < image.width - 1 and color_similar(image.getpixel((right + 1, start_y)), original_color):
+    while right < image.width - padding and color_similar(image.getpixel((right + 1, start_y)), original_color, threshold=10):
         right += 1
-    while left > 0 and color_similar(image.getpixel((left - 1, start_y)), original_color):
+    while left > padding and color_similar(image.getpixel((left - 1, start_y)), original_color, threshold=10):
         left -= 1
 
-    print(f"Top: {top}, Bottom: {bottom}, Left: {left}, Right: {right}")
     width = right - left + 1
     height = bottom - top + 1
-    print(width / height, height / width)
     
+    # More lenient aspect ratio check
     is_invalid_tile = (
         right - left == 0 or bottom - top == 0 or
-        width / height > 1.2 or
-        height / width > 1.2
+        width / height > 1.5 or
+        height / width > 1.5
     )
     is_out_of_bounds = (
-        top <= 0 or bottom >= image.height or
-        left <= 0 or right >= image.width
+        top <= padding or bottom >= image.height - padding or
+        left <= padding or right >= image.width - padding
     )
 
     if is_invalid_tile or is_out_of_bounds:
@@ -59,7 +61,7 @@ def _detect_tile_boundaries_helper(image, start_x, start_y):
 
 def _detect_tile_boundaries(image, start_x = None, start_y = None):
     """
-    Always detect the boundaries of a tile based on the color of the starting pixel.
+    Detect the boundaries of a tile based on the color of the starting pixel.
 
     Args:
         image (PIL.Image): The image to analyze.
@@ -72,17 +74,48 @@ def _detect_tile_boundaries(image, start_x = None, start_y = None):
     Raises:
         ValueError: If no tile is found (e.g. image is empty or contains no tiles).
     """
-    if start_x and start_y:
+    # Convert image to RGB if it's not already
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+    
+    # Get image dimensions
+    width, height = image.size
+    
+    # If no starting point provided, try multiple points
+    if start_x is None or start_y is None:
+        # Try center points first
+        start_x = width // 2
+        start_y = height // 2
         tile = _detect_tile_boundaries_helper(image, start_x, start_y)
         if tile:
             return tile
-    else:
-        for x in range(image.width // 4, 3 * image.width // 4):
-            for y in range(image.height // 4, 3 * image.height // 4):
+            
+        # If center fails, try a grid pattern
+        step = 5  # Reduced step size for more thorough search
+        for x in range(width // 4, 3 * width // 4, step):
+            for y in range(height // 4, 3 * height // 4, step):
                 tile = _detect_tile_boundaries_helper(image, x, y)
                 if tile:
                     return tile
-    raise ValueError("No tile found")
+    else:
+        # Try the provided starting point
+        tile = _detect_tile_boundaries_helper(image, start_x, start_y)
+        if tile:
+            return tile
+            
+        # If provided point fails, try nearby points
+        for dx in range(-5, 6, 5):
+            for dy in range(-5, 6, 5):
+                if dx == 0 and dy == 0:
+                    continue
+                new_x = start_x + dx
+                new_y = start_y + dy
+                if 0 <= new_x < width and 0 <= new_y < height:
+                    tile = _detect_tile_boundaries_helper(image, new_x, new_y)
+                    if tile:
+                        return tile
+    
+    raise ValueError("No tile found - please ensure the board is properly captured and visible")
 
 def get_intersection(image, region1, region2, output_file1, output_file2):
     """
@@ -132,10 +165,37 @@ def get_starter_template(board_image, output_file1, output_file2):
     """
     image = Image.open("template/" + board_image)
 
+    # Find first tile
     region1 = _detect_tile_boundaries(image)
-    x_offset = 3 * (region1[2] - region1[0]) // 4
-    region2 = _detect_tile_boundaries(image, region1[2] + x_offset, (region1[1] + region1[3]) // 2)
-
+    if not region1:
+        raise ValueError("Could not find first tile")
+    
+    # Calculate tile dimensions
+    tile_width = region1[2] - region1[0]
+    tile_height = region1[3] - region1[1]
+    
+    # Try to find second tile directly to the right of first tile
+    # Start slightly inside the second tile to avoid edge detection issues
+    start_x = region1[2] + tile_width // 2
+    start_y = region1[1] + tile_height // 2
+    
+    # If that fails, try a few pixels to the right
+    for offset in [0, 2, -2, 4, -4]:
+        try:
+            region2 = _detect_tile_boundaries(image, start_x + offset, start_y)
+            if region2:
+                # Verify this is actually the next tile to the right
+                if region2[0] > region1[2]:  # Second tile starts after first tile ends
+                    break
+                # If not, try again
+                region2 = None
+        except ValueError:
+            continue
+    
+    if not region2:
+        raise ValueError("Could not find second tile next to first tile")
+    
+    # Save the tiles
     default_tile1 = capture_tile(image, region1)
     default_tile2 = capture_tile(image, region2)
 
@@ -144,4 +204,5 @@ def get_starter_template(board_image, output_file1, output_file2):
     if default_tile2:
         default_tile2.save("template/" + output_file2)
 
+    # Get intersection patterns
     get_intersection(image, region1, region2, "intersection1.png", "intersection2.png")
