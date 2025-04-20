@@ -32,50 +32,49 @@ initialization_click(board_region, tile_width, tile_height)
 r_row, r_col = random_click(grid_coordinates)
 # everything above should stay as is below this are things that can be wrapped to a function
 time.sleep(1)
+tile_regions = get_all_tile_regions(grid_coordinates)
 solver = SolverLogic(row, col)
-no_good = True
-while no_good:
-    r_row, r_col = random_click(grid_coordinates)  
-    capture_board("state.png", board_region)
-    image = Image.open("template/state.png")
-    region = (get_tile_region(r_row, r_col, grid_coordinates))
-    sc = capture_tile(image, region)
-    number = get_tile_number(sc)
-    solver.grid[r_row][r_col].value = int(number) if number else 0
-    if solver.grid[r_row][r_col].value == 0:
-        update_around_empty_tile(r_row, r_col, solver.grid, grid_coordinates)
-        no_good = False
+r_row, r_col = random_click(grid_coordinates)  
+capture_board("state.png", board_region)
+board_image = Image.open("template/state.png")
+region = (get_tile_region(r_row, r_col, grid_coordinates))
+sc = capture_tile(board_image, region)
+number = get_tile_number(sc)
+solver.grid[r_row][r_col].value = int(number) if number else 0
+if solver.grid[r_row][r_col].value == 0:
+    update_around_empty_tile(r_row, r_col, solver.grid, grid_coordinates)  
 if all([all([cell.value == 0 for cell in row]) for row in solver.grid]):
     print("The board is unreadable. Please zoom in and try again.")
     exit(0)
 
-
+def update(r, c):
+    capture_board("state.png", board_region)
+    image = Image.open("template/state.png")
+    number = get_tile_number(capture_tile(image, tile_regions[r][c]))
+    solver.update_cell(r, c, int(number) if number else 0)
+    if solver.grid[r][c].value == 0:
+        update_around_empty_tile(r, c, solver.grid, grid_coordinates)  
 
 
 for _ in range(100):  # Limit the loop to 100 iterations for controlled execution
     s = solver.find_safe_moves()
     print(s)
-    for row, col in s:
-        click_at(grid_coordinates[row][col][0], grid_coordinates[row][col][1])
-    click_all(s)
+    for r, c in s:
+        click_at(grid_coordinates[r][c][0], grid_coordinates[r][c][1])
+        update(r, c)
+    # click_all(s)
     m = solver.find_certain_mines()
-    for row, col in m:
-        click_at(grid_coordinates[row][col][0], grid_coordinates[row][col][1])
+    for r, c in m:
+        flag_at(grid_coordinates[r][c][0], grid_coordinates[r][c][1])
+        solver.update_cell(r, c, -1)
     print(m)
     # flag_all(m)
     e = solver.make_educated_guess()
-    for row, col in e:
-        click_at(grid_coordinates[row][col][0], grid_coordinates[row][col][1])
+    for r, c in e:
+        click_at(grid_coordinates[r][c][0], grid_coordinates[r][c][1])
+        update(r, c)
     print(e)
     # click_all(e)
-    capture_board("state.png", board_region)
-    image = Image.open("template/state.png")
-    tiles = get_all_tile_regions(grid_coordinates)
-    new_grid = read_board_numbers(image, tiles)
-    for r in range(row):
-        for c in range(col):
-            if new_grid[r][c]:
-                solver.update_cell(r, c, new_grid[r][c])
     
     
 

@@ -164,6 +164,5 @@ class SolverLogic:
                         min_prob = cell.probability
                         best_guess = (row, col)
         
-        self.safe_cells.add(best_guess)
         return {best_guess}
      
