@@ -4,7 +4,7 @@ from read.capture import capture_tile, capture_board
 from PIL import Image
 from collections import deque
 
-def update_around_empty_tile(i_row, i_col, solver, grid_coordinates, board_region):
+def update_around_empty_tile(i_row, i_col, solver, board_img, tile_regions):
     """
     Update all cells around an empty (zero) tile.
     
@@ -24,12 +24,9 @@ def update_around_empty_tile(i_row, i_col, solver, grid_coordinates, board_regio
             return False
             
         try:
-            capture_board("state.png", board_region)
-            image = Image.open("template/state.png")
-            region = get_tile_region(row, col, grid_coordinates)
-            tile = capture_tile(image, region)
+            tile = capture_tile(board_img, tile_regions[row][col])
             number = get_tile_number(tile)
-            
+            print(f"Tile at ({row}, {col}) has number: {number}")
             value = int(number) if number else 0
             solver.update_cell(row, col, value)
             print(f"Updated cell ({row}, {col}) with value {value}")

@@ -61,7 +61,7 @@ def update_board_state(r: int, c: int) -> bool:
         else:    
             # Process empty tiles
             solver.update_cell(r, c, 0)
-            update_around_empty_tile(r, c, solver, grid_coordinates, board_region)
+            update_around_empty_tile(r, c, solver, tile_regions)
             
         return True
     except Exception as e:
@@ -89,7 +89,7 @@ def make_move(r: int, c: int, is_flag: bool = False) -> bool:
         if is_flag and solver.grid[r][c].is_flagged:
             print(f"Skipping already flagged cell ({r}, {c})")
             return True
-            
+ 
         if is_flag:
             print(f"Flagging cell ({r}, {c})")
             flag_at(grid_coordinates[r][c][0], grid_coordinates[r][c][1])
@@ -104,7 +104,6 @@ def make_move(r: int, c: int, is_flag: bool = False) -> bool:
             capture_board("state.png", board_region)
             image = Image.open("template/state.png")
             number = get_tile_number(capture_tile(image, tile_regions[r][c]))
-            
             # Check if we hit a mine
             if number == 'X' or number == 'x':
                 print(f"Hit a mine at ({r}, {c})!")
@@ -120,11 +119,11 @@ def make_move(r: int, c: int, is_flag: bool = False) -> bool:
                 # Process empty tiles
                 solver.update_cell(r, c, 0)
                 print(f"Processing zero cell at ({r}, {c})")
-                update_around_empty_tile(r, c, solver, grid_coordinates, board_region)
+                update_around_empty_tile(r, c, solver,image, tile_regions)
                 
         return True
     except Exception as e:
-        print(f"Error making move: {str(e)}")
+        print(f"Error making move {r}, {c}: {str(e)}")
         return False
 
 def check_game_state() -> bool:
