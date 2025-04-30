@@ -6,50 +6,47 @@ from collections import deque
 
 def update_around_empty_tile(i_row, i_col, solver, board_img, tile_regions):
     """
-    Update all cells around an empty (zero) tile.
-    
-    Args:
-        i_row (int): Row index of the empty tile
-        i_col (int): Column index of the empty tile
-        solver (SolverLogic): The solver instance
-        grid_coordinates (list): List of tile coordinates
-        board_region (tuple): The board region (x, y, width, height)
+    Update all cells around an empty (zero) tile that are visible (opened).
+    Stop recursion when a number tile is found.
     """
     def is_within_bounds(row, col):
         return 0 <= row < len(solver.grid) and 0 <= col < len(solver.grid[0])
 
     def process_tile(row, col):
-        # Skip if cell is already processed
+        # Skip if already known
         if solver.grid[row][col].value is not None:
             return False
-            
+
         try:
-            tile = capture_tile(board_img, tile_regions[row][col])
-            number = get_tile_number(tile)
-            print(f"Tile at ({row}, {col}) has number: {number}")
-            value = int(number) if number else 0
+            tile_img = capture_tile(board_img, tile_regions[row][col])
+            number = get_tile_number(tile_img)
+
+            # If it's not visibly opened (number is None or ''), do not process it
+            if number is None or number == '':
+                print(f"Tile at ({row}, {col}) is not visibly open, skipping.")
+                return False
+
+            value = int(number)
             solver.update_cell(row, col, value)
             print(f"Updated cell ({row}, {col}) with value {value}")
-            return value == 0  # Continue if this is also a zero
+            return value == 0  # Continue recursion only if this tile is also empty
         except Exception as e:
             print(f"Error processing tile at ({row}, {col}): {str(e)}")
             return False
 
-
-    # Use BFS to process all connected zero tiles
+    # BFS to reveal only connected visibly opened empty tiles
     queue = deque([(i_row, i_col)])
     visited = set([(i_row, i_col)])
 
     while queue:
         row, col = queue.popleft()
         print(f"Processing neighbors of cell ({row}, {col})")
-        
-        # Process all 8 neighbors
+
         for d_row in range(-1, 2):
             for d_col in range(-1, 2):
                 if d_row == 0 and d_col == 0:
                     continue
-                    
+
                 new_row, new_col = row + d_row, col + d_col
                 if is_within_bounds(new_row, new_col) and (new_row, new_col) not in visited:
                     visited.add((new_row, new_col))
