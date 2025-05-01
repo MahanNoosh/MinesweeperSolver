@@ -13,7 +13,6 @@ class Cell:
     row: int
     col: int
     value: Optional[int] = None  # None = unopened, -1 = mine, 0-8 = number
-    is_mine: bool = False
     is_flagged: bool = False
     probability: float = 0.0
 
@@ -45,7 +44,7 @@ class SolverLogic:
         print(f"Updating SolverLogic cell at row={row}, col={col} with value={value}")
         self.grid[row][col].value = value
         if value == -1:
-            self.grid[row][col].is_mine = True
+            self.grid[row][col].is_flagged = True
             self.mines_found.add((row, col))
     
     def get_neighbors(self, row: int, col: int) -> List[Cell]:
@@ -89,11 +88,6 @@ class SolverLogic:
                     if flagged == cell.value and unopened:
                         print(f"Found safe cells around ({row}, {col}) - all mines flagged")
                         safe_cells.update(unopened)
-                    
-                    # If number is 0, all unopened neighbors are safe
-                    elif cell.value == 0 and unopened:
-                        print(f"Found safe cells around ({row}, {col}) - zero cell")
-                        safe_cells.update(unopened)
         
         return safe_cells
     
@@ -125,47 +119,6 @@ class SolverLogic:
                     if remaining_mines == len(unopened) and unopened:
                         print(f"  Found {len(unopened)} certain mines around ({row}, {col})")
                         certain_mines.update(unopened)
-                    
-                    # Special case: If number is 1 and has exactly one unopened neighbor
-                    elif cell.value == 1 and len(unopened) == 1:
-                        print(f"  Found certain mine at {unopened[0]} - single unopened neighbor of 1")
-                        certain_mines.add(unopened[0])
-        
-        # Second pass: Find mines based on overlapping constraints
-        for row in range(self.rows):
-            for col in range(self.cols):
-                cell = self.grid[row][col]
-                if cell.value is not None and cell.value > 0:
-                    neighbors = self.get_neighbors(row, col)
-                    flagged = sum(1 for n in neighbors if n.is_flagged)
-                    unopened = [(n.row, n.col) for n in neighbors 
-                               if n.value is None and not n.is_flagged]
-                    
-                    if unopened and cell.value - flagged > 0:
-                        # Check if any unopened cell is a mine based on other constraints
-                        for r, c in unopened:
-                            # Count how many other cells require this cell to be a mine
-                            mine_requirements = 0
-                            for dr in [-1, 0, 1]:
-                                for dc in [-1, 0, 1]:
-                                    if dr == 0 and dc == 0:
-                                        continue
-                                    new_row, new_col = r + dr, c + dc
-                                    if 0 <= new_row < self.rows and 0 <= new_col < self.cols:
-                                        neighbor_cell = self.grid[new_row][new_col]
-                                        if neighbor_cell.value is not None and neighbor_cell.value > 0:
-                                            neighbor_neighbors = self.get_neighbors(new_row, new_col)
-                                            neighbor_flagged = sum(1 for n in neighbor_neighbors if n.is_flagged)
-                                            neighbor_unopened = [(n.row, n.col) for n in neighbor_neighbors 
-                                                               if n.value is None and not n.is_flagged]
-                                            if (r, c) in neighbor_unopened:
-                                                if neighbor_cell.value - neighbor_flagged == len(neighbor_unopened):
-                                                    mine_requirements += 1
-                            
-                            # If multiple constraints require this cell to be a mine, it's likely a mine
-                            if mine_requirements >= 3:  # Increased threshold to be more conservative
-                                print(f"Found mine at ({r}, {c}) based on {mine_requirements} overlapping constraints")
-                                certain_mines.add((r, c))
         
         # Only return new mines that haven't been found yet
         new_mines = certain_mines - self.mines_found

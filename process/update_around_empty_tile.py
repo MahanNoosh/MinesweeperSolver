@@ -1,55 +1,68 @@
-from read.get_tile_number import get_tile_number
-from process.get_tile_region import get_tile_region
-from read.capture import capture_tile, capture_board
-from PIL import Image
 from collections import deque
+from read.get_tile_number import get_tile_number
+from read.capture import capture_tile
 
 def update_around_empty_tile(i_row, i_col, solver, board_img, tile_regions):
     """
-    Update all cells around an empty (zero) tile that are visible (opened).
-    Stop recursion when a number tile is found.
+    Perform BFS starting from an already-known empty tile.
+    Only blank tiles ('') are enqueued. Numbered tiles are updated but not enqueued.
     """
-    def is_within_bounds(row, col):
-        return 0 <= row < len(solver.grid) and 0 <= col < len(solver.grid[0])
 
-    def process_tile(row, col):
-        # Skip if already known
-        if solver.grid[row][col].value is not None:
-            return False
+    def is_within_bounds(r, c):
+        return 0 <= r < len(solver.grid) and 0 <= c < len(solver.grid[0])
+
+    def read_and_update(r, c):
+        if solver.grid[r][c].value is not None:
+            return None  # already processed
 
         try:
-            tile_img = capture_tile(board_img, tile_regions[row][col])
+            tile_img = capture_tile(board_img, tile_regions[r][c])
             number = get_tile_number(tile_img)
-
-            # If it's not visibly opened (number is None or ''), do not process it
-            if number is None or number == '':
-                print(f"Tile at ({row}, {col}) is not visibly open, skipping.")
-                return False
-
-            value = int(number)
-            solver.update_cell(row, col, value)
-            print(f"Updated cell ({row}, {col}) with value {value}")
-            return value == 0  # Continue recursion only if this tile is also empty
+            if number == '':
+                solver.update_cell(r, c, 0)
+                return ''
+            elif number.isdigit():
+                solver.update_cell(r, c, int(number))
+                return number
         except Exception as e:
-            print(f"Error processing tile at ({row}, {col}): {str(e)}")
-            return False
+            print(f"Error reading tile at ({r}, {c}): {e}")
+        return None
 
-    # BFS to reveal only connected visibly opened empty tiles
-    queue = deque([(i_row, i_col)])
-    visited = set([(i_row, i_col)])
+    visited = set()
+    queue = deque()
 
+    # Start BFS from neighbors of the known-empty tile
+    for dr in [-1, 0, 1]:
+        for dc in [-1, 0, 1]:
+            if dr == 0 and dc == 0:
+                continue
+            nr, nc = i_row + dr, i_col + dc
+            if not is_within_bounds(nr, nc) or (nr, nc) in visited:
+                continue
+
+            result = read_and_update(nr, nc)
+            visited.add((nr, nc))
+
+            if result == '':
+                queue.append((nr, nc))
+            elif result:
+                solver.update_cell(nr, nc, int(result))
+
+    # Continue BFS on all revealed empty tiles
     while queue:
         row, col = queue.popleft()
-        print(f"Processing neighbors of cell ({row}, {col})")
 
-        for d_row in range(-1, 2):
-            for d_col in range(-1, 2):
-                if d_row == 0 and d_col == 0:
+        # Explore neighbors of this empty tile
+        for dr in [-1, 0, 1]:
+            for dc in [-1, 0, 1]:
+                if dr == 0 and dc == 0:
+                    continue
+                nr, nc = row + dr, col + dc
+                if not is_within_bounds(nr, nc) or (nr, nc) in visited:
                     continue
 
-                new_row, new_col = row + d_row, col + d_col
-                if is_within_bounds(new_row, new_col) and (new_row, new_col) not in visited:
-                    visited.add((new_row, new_col))
-                    if process_tile(new_row, new_col):
-                        queue.append((new_row, new_col))
-                        print(f"Added cell ({new_row}, {new_col}) to queue")
+                result = read_and_update(nr, nc)
+                visited.add((nr, nc))
+
+                if result == '':
+                    queue.append((nr, nc))

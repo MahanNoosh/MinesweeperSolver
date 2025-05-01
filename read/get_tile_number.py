@@ -21,10 +21,14 @@ def get_tile_number(pil_image):
     resized = cv2.resize(thresh, (100, 100), interpolation=cv2.INTER_LINEAR)
 
     # OCR with digit whitelist
-    config = "--psm 10 -c tessedit_char_whitelist=12345678"
+    config = "--psm 10 --oem 3 -c tessedit_char_whitelist=12345678"
     text = pytesseract.image_to_string(resized, config=config)
 
     # Extract and return digit
     number = ''.join(filter(str.isdigit, text))
+    # Show the processed image for debugging
+    # cv2.imshow("Processed Image", resized)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     print(number)
     return number
