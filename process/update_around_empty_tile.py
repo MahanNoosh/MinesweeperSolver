@@ -37,16 +37,14 @@ def update_around_empty_tile(i_row, i_col, solver, board_img, tile_regions):
             if dr == 0 and dc == 0:
                 continue
             nr, nc = i_row + dr, i_col + dc
-            if not is_within_bounds(nr, nc) or (nr, nc) in visited:
+            if not is_within_bounds(nr, nc):
                 continue
 
             result = read_and_update(nr, nc)
-            visited.add((nr, nc))
-
-            if result == '':
-                queue.append((nr, nc))
-            elif result:
-                solver.update_cell(nr, nc, int(result))
+            if result is not None:
+                visited.add((nr, nc))
+                if result == '':
+                    queue.append((nr, nc))
 
     # Continue BFS on all revealed empty tiles
     while queue:
@@ -62,7 +60,7 @@ def update_around_empty_tile(i_row, i_col, solver, board_img, tile_regions):
                     continue
 
                 result = read_and_update(nr, nc)
-                visited.add((nr, nc))
-
-                if result == '':
-                    queue.append((nr, nc))
+                if result is not None:
+                    visited.add((nr, nc))
+                    if result == '':
+                        queue.append((nr, nc))

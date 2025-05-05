@@ -15,7 +15,7 @@ def get_tile_number(pil_image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Threshold to isolate digits
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+    _, thresh = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY_INV)
 
     # Resize for better OCR
     resized = cv2.resize(thresh, (100, 100), interpolation=cv2.INTER_LINEAR)

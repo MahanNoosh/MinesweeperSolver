@@ -98,7 +98,7 @@ def make_move(r: int, c: int, is_flag: bool = False) -> bool:
         else:
             print(f"Clicking cell ({r}, {c})")
             click_at(grid_coordinates[r][c][0], grid_coordinates[r][c][1])
-            time.sleep(0.5)  # Increased delay after clicking
+            time.sleep(1)  # Increased delay after clicking
             
             # Update board state after clicking
             capture_board("state.png", board_region)
@@ -136,7 +136,7 @@ def check_game_state() -> bool:
     for r in range(row):
         for c in range(col):
             cell = solver.grid[r][c]
-            if not cell.is_mine and cell.value is None:
+            if not cell.is_flagged and cell.value is None:
                 return True
     return False
 
